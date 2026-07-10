@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Verify Your Email — AquaTrack</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; color: #333; }
+        .wrapper { max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        .card { background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+        .header { background: linear-gradient(135deg, #1976d2 0%, #00acc1 100%); padding: 40px 32px; text-align: center; }
+        .header-logo { font-size: 32px; margin-bottom: 8px; }
+        .header h1 { color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
+        .header p { color: rgba(255,255,255,0.85); font-size: 14px; margin-top: 4px; }
+        .body { padding: 40px 32px; }
+        .greeting { font-size: 18px; font-weight: 600; color: #1a1a2e; margin-bottom: 16px; }
+        .text { font-size: 15px; line-height: 1.7; color: #555; margin-bottom: 16px; }
+        .btn-wrapper { text-align: center; margin: 32px 0; }
+        .btn { display: inline-block; background: linear-gradient(135deg, #1976d2, #00acc1);
+               color: #ffffff !important; text-decoration: none; padding: 14px 40px;
+               border-radius: 12px; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; }
+        .divider { border: none; border-top: 1px solid #f0f0f0; margin: 24px 0; }
+        .link-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+                    padding: 12px 16px; word-break: break-all; font-size: 12px; color: #64748b; }
+        .expiry-note { background: #fff7ed; border-left: 4px solid #ff9800; border-radius: 0 8px 8px 0;
+                       padding: 12px 16px; font-size: 14px; color: #92400e; margin-bottom: 24px; }
+        .footer { background: #f8fafc; padding: 24px 32px; text-align: center; border-top: 1px solid #f0f0f0; }
+        .footer p { font-size: 12px; color: #94a3b8; line-height: 1.6; }
+        .footer a { color: #1976d2; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="card">
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-logo">💧</div>
+            <h1>AquaTrack</h1>
+            <p>Water Consumption & Billing Management</p>
+        </div>
+
+        <!-- Body -->
+        <div class="body">
+            <p class="greeting">Hi <span th:text="${firstName}">User</span>,</p>
+
+            <p class="text">
+                Welcome to <strong>AquaTrack</strong>! We're thrilled to have you on board.
+                To get started, please verify your email address by clicking the button below.
+            </p>
+
+            <div class="expiry-note">
+                ⏰ This verification link expires in
+                <strong th:text="${expiryHours}">48</strong> hours.
+            </div>
+
+            <div class="btn-wrapper">
+                <a th:href="${verifyLink}" class="btn">Verify My Email Address</a>
+            </div>
+
+            <hr class="divider"/>
+
+            <p class="text" style="font-size:13px;">
+                If the button above doesn't work, copy and paste the link below into your browser:
+            </p>
+            <div class="link-box" th:text="${verifyLink}">https://app.aquatrack.com/verify-email?token=...</div>
+
+            <hr class="divider"/>
+
+            <p class="text" style="font-size:13px; color:#94a3b8;">
+                If you did not create an AquaTrack account, you can safely ignore this email.
+                No account will be created without verification.
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                © <span th:text="${currentYear}">2024</span> AquaTrack. All rights reserved.<br/>
+                Need help? Contact us at
+                <a th:href="'mailto:' + ${supportEmail}" th:text="${supportEmail}">support@aquatrack.com</a>
+            </p>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,127 @@
+##############################################################
+# AquaTrack — Docker Compose (Local Development)
+#
+# Services:
+#   postgres    — PostgreSQL 16 database
+#   mailhog     — Local SMTP server with web UI for email testing
+#   backend     — Spring Boot API (builds from source)
+#   frontend    — React/Vite dev server
+#
+# Usage:
+#   docker compose up -d          # Start everything
+#   docker compose logs -f        # Tail all logs
+#   docker compose down -v        # Stop and remove volumes
+##############################################################
+
+services:
+
+  # ── PostgreSQL Database ────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: aquatrack-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-aquatrack_db}
+      POSTGRES_USER: ${DB_USERNAME:-aquatrack_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-aquatrack_pass}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-aquatrack_user} -d ${DB_NAME:-aquatrack_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - aquatrack-network
+
+  # ── MailHog (local email testing) ─────────────────────────
+  # Web UI: http://localhost:8025
+  # SMTP:   localhost:1025
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: aquatrack-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"    # SMTP port
+      - "8025:8025"    # Web UI port
+    networks:
+      - aquatrack-network
+
+  # ── Spring Boot Backend ────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: aquatrack-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-aquatrack_db}
+      DB_USERNAME: ${DB_USERNAME:-aquatrack_user}
+      DB_PASSWORD: ${DB_PASSWORD:-aquatrack_pass}
+      JWT_SECRET: ${JWT_SECRET:-ChangeThisInProduction-256BitSecret-AquaTrack}
+      JWT_ACCESS_EXPIRY_MS: ${JWT_ACCESS_EXPIRY_MS:-900000}
+      JWT_REFRESH_EXPIRY_MS: ${JWT_REFRESH_EXPIRY_MS:-604800000}
+#      MAIL_HOST: mailhog
+#      MAIL_PORT: 1025
+#      MAIL_USERNAME: ""
+#      MAIL_PASSWORD: ""
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@aquatrack.com}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      SERVER_PORT: 8080
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    volumes:
+      - backend_logs:/app/logs
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    networks:
+      - aquatrack-network
+
+  # ── React Frontend ─────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: aquatrack-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080}
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    networks:
+      - aquatrack-network
+
+# ── Volumes ────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+    name: aquatrack-postgres-data
+  backend_logs:
+    name: aquatrack-backend-logs
+
+# ── Networks ───────────────────────────────────────────────────
+networks:
+  aquatrack-network:
+    name: aquatrack-network
+    driver: bridge

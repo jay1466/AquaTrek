@@ -1,0 +1,79 @@
+# ============================================================
+# AquaTrack .gitignore
+# ============================================================
+
+# ── Secrets (NEVER commit) ───────────────────────────────────
+.env
+*.env.local
+*.env.*.local
+
+# ── Java / Maven ─────────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+
+# ── Spring Boot ──────────────────────────────────────────────
+application-local.yml
+application-local.properties
+
+# ── Logs ─────────────────────────────────────────────────────
+logs/
+*.log
+*.log.gz
+
+# ── IDEs ─────────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.factorypath
+*.eclipse
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+*.swp
+*.swo
+*~
+
+# ── Node / Frontend ──────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+.pnpm-store/
+*.local
+
+# ── OS ───────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V500
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ── Docker ───────────────────────────────────────────────────
+# Keep docker-compose.yml tracked, but ignore override files
+docker-compose.override.yml
+
+# ── Test Coverage ────────────────────────────────────────────
+target/site/
+jacoco.exec
+
+# ── PDF / Invoice temp files ─────────────────────────────────
+*.pdf
+!src/test/resources/*.pdf
+
+# ── Database dumps ───────────────────────────────────────────
+*.sql.gz
+*.dump

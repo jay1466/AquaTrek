@@ -1,0 +1,188 @@
+/* ============================================================
+   AquaTrack Global Styles
+   Combines: Tailwind base/components/utilities + custom vars
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── CSS Custom Properties (Light Mode) ──────────────────────── */
+:root {
+  --color-primary:       #1976d2;
+  --color-primary-light: #42a5f5;
+  --color-primary-dark:  #0d47a1;
+  --color-secondary:     #00acc1;
+
+  --color-bg:            #f4f6f9;
+  --color-surface:       #ffffff;
+  --color-border:        #e0e0e0;
+
+  --color-text-primary:  #1a1a2e;
+  --color-text-secondary:#64748b;
+  --color-text-disabled: #94a3b8;
+
+  --color-success:       #4caf50;
+  --color-warning:       #ff9800;
+  --color-error:         #f44336;
+  --color-info:          #2196f3;
+
+  /* Sidebar */
+  --sidebar-width:       260px;
+  --sidebar-collapsed:   72px;
+  --topbar-height:       64px;
+
+  /* Transitions */
+  --transition-fast:     150ms ease;
+  --transition-normal:   300ms ease;
+  --transition-slow:     500ms ease;
+
+  /* Shadows */
+  --shadow-card:         0 2px 12px 0 rgba(0, 0, 0, 0.08);
+  --shadow-card-hover:   0 8px 32px 0 rgba(0, 0, 0, 0.16);
+  --shadow-modal:        0 24px 64px rgba(0, 0, 0, 0.2);
+}
+
+/* ── CSS Custom Properties (Dark Mode) ──────────────────────── */
+.dark {
+  --color-bg:            #0f1117;
+  --color-surface:       #1a1d27;
+  --color-border:        #2d3148;
+
+  --color-text-primary:  #f1f5f9;
+  --color-text-secondary:#94a3b8;
+  --color-text-disabled: #475569;
+
+  --shadow-card:         0 2px 12px 0 rgba(0, 0, 0, 0.4);
+  --shadow-card-hover:   0 8px 32px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* ── Base Reset ──────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Roboto', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+/* ── Scrollbar Styling ───────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-disabled);
+}
+
+/* ── Typography ──────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-text-primary);
+}
+
+/* ── Utility Layer Extensions ────────────────────────────────── */
+@layer utilities {
+
+  /* Page container with standard padding */
+  .page-container {
+    @apply p-6 max-w-screen-2xl mx-auto;
+  }
+
+  /* Metric card */
+  .metric-card {
+    @apply bg-white dark:bg-dark-card rounded-2xl p-5 shadow-card
+           transition-shadow duration-300 hover:shadow-card-hover;
+  }
+
+  /* Status badge base */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-success { @apply badge bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400; }
+  .badge-warning { @apply badge bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400; }
+  .badge-error   { @apply badge bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400; }
+  .badge-info    { @apply badge bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400; }
+  .badge-neutral { @apply badge bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400; }
+
+  /* Form label */
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent;
+  }
+
+  /* Sidebar item */
+  .sidebar-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+           text-gray-600 dark:text-gray-400 transition-all duration-150
+           hover:bg-primary-50 hover:text-primary-700
+           dark:hover:bg-primary-900/20 dark:hover:text-primary-300;
+  }
+
+  .sidebar-item-active {
+    @apply sidebar-item bg-primary-50 text-primary-700
+           dark:bg-primary-900/30 dark:text-primary-300;
+  }
+
+  /* Loading skeleton pulse */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
+  }
+}
+
+/* ── MUI Overrides ───────────────────────────────────────────── */
+/* Make MUI components respect the Tailwind dark mode class */
+.dark .MuiPaper-root {
+  background-color: var(--color-surface);
+}
+
+.dark .MuiTableCell-root {
+  border-bottom-color: var(--color-border);
+}
+
+/* ── Animation Classes ────────────────────────────────────────── */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

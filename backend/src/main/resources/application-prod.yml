@@ -1,0 +1,54 @@
+##############################################################
+# AquaTrack — Production Profile Configuration
+# Activated by: SPRING_PROFILES_ACTIVE=prod
+# ALL sensitive values MUST come from environment variables.
+##############################################################
+
+spring:
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        generate_statistics: false
+  datasource:
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:20}
+      minimum-idle: ${DB_POOL_MIN_IDLE:5}
+
+server:
+  error:
+    include-message: never          # Do NOT expose messages in prod
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+
+logging:
+  level:
+    root: WARN
+    com.aquatrack: INFO
+    com.aquatrack.security: WARN
+    org.springframework.security: WARN
+    org.hibernate: WARN
+    org.flywaydb: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Rate limiting — stricter in production
+app:
+  rate-limit:
+    capacity: ${RATE_LIMIT_CAPACITY:60}
+    refill-tokens: ${RATE_LIMIT_REFILL:60}
+    refill-period-seconds: ${RATE_LIMIT_PERIOD:60}
+
+springdoc:
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}    # Disable Swagger UI in production by default
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:false}

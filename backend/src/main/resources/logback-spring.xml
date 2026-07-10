@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  AquaTrack Logback Configuration
+  - Dev:  Pretty, coloured console output
+  - Prod: JSON structured logs (logstash-friendly)
+  - Rolling file appender for all profiles
+-->
+<configuration>
+
+    <!-- ===== Properties ===== -->
+    <property name="LOG_PATH" value="${LOG_PATH:-logs}"/>
+    <property name="APP_NAME" value="aquatrack"/>
+
+    <!-- ===== Console Appender (dev) ===== -->
+    <springProfile name="dev">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>
+                    %cyan(%d{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level) [%yellow(%thread)] %magenta(%logger{36}) - %msg%n
+                </pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
+    </springProfile>
+
+    <!-- ===== Console Appender (prod) — plain text, no colour ===== -->
+    <springProfile name="prod">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
+    </springProfile>
+
+    <!-- ===== Rolling File Appender — all profiles ===== -->
+    <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${APP_NAME}.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Roll daily; keep 30 days of history; compress old logs -->
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ===== Dedicated Error Log File ===== -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${APP_NAME}-error.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}-error-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n%ex</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ===== Async Wrapper (improves throughput) ===== -->
+    <appender name="ASYNC_ROLLING" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="ROLLING_FILE"/>
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+    </appender>
+
+    <!-- ===== Logger Levels ===== -->
+
+    <!-- AquaTrack application code — DEBUG in dev, INFO in prod -->
+    <springProfile name="dev">
+        <logger name="com.aquatrack" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_ROLLING"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </logger>
+    </springProfile>
+
+    <springProfile name="prod">
+        <logger name="com.aquatrack" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_ROLLING"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </logger>
+    </springProfile>
+
+    <!-- Hibernate SQL — only in dev -->
+    <springProfile name="dev">
+        <logger name="org.hibernate.SQL" level="DEBUG"/>
+        <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>
+    </springProfile>
+    <springProfile name="prod">
+        <logger name="org.hibernate" level="WARN"/>
+    </springProfile>
+
+    <!-- Spring Security — reduce noise -->
+    <logger name="org.springframework.security" level="WARN"/>
+
+    <!-- Flyway — INFO to see migration output -->
+    <logger name="org.flywaydb" level="INFO"/>
+
+    <!-- Spring Boot autoconfiguration — reduce startup noise -->
+    <logger name="org.springframework.boot.autoconfigure" level="WARN"/>
+
+    <!-- ===== Root Logger ===== -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ASYNC_ROLLING"/>
+        <appender-ref ref="ERROR_FILE"/>
+    </root>
+
+</configuration>

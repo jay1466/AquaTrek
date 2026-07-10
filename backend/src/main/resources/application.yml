@@ -1,0 +1,188 @@
+##############################################################
+# AquaTrack — Main Application Configuration
+# All sensitive values are read from environment variables.
+# Defaults are for local development only — NEVER use in prod.
+##############################################################
+
+spring:
+  application:
+    name: aquatrack-backend
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  # ── Database ─────────────────────────────────────────────
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:aquatrack_db}
+    username: ${DB_USERNAME:aquatrack_user}
+    password: ${DB_PASSWORD:aquatrack_pass}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: AquaTrack-HikariPool
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
+      connection-timeout: 30000       # 30 seconds
+      idle-timeout: 600000            # 10 minutes
+      max-lifetime: 1800000           # 30 minutes
+      keepalive-time: 60000           # 1 minute
+      connection-test-query: SELECT 1
+      auto-commit: true
+
+  # ── JPA / Hibernate ──────────────────────────────────────
+  jpa:
+    hibernate:
+      ddl-auto: validate              # Flyway owns the schema — Hibernate only validates
+    show-sql: false
+    open-in-view: false               # Disable OSIV to avoid lazy-load issues
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+        default_schema: public
+        jdbc:
+          batch_size: 50
+          lob:
+            non_contextual_creation: true
+        order_inserts: true
+        order_updates: true
+        generate_statistics: false
+
+  # ── Flyway ───────────────────────────────────────────────
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: true
+    locations: classpath:db/migration
+    schemas: public
+    table: flyway_schema_history
+    out-of-order: false
+
+  # ── Mail ─────────────────────────────────────────────────
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
+    default-encoding: UTF-8
+
+  # ── Async ────────────────────────────────────────────────
+  task:
+    execution:
+      thread-name-prefix: aquatrack-async-
+      pool:
+        core-size: 4
+        max-size: 16
+        queue-capacity: 200
+    scheduling:
+      thread-name-prefix: aquatrack-scheduler-
+
+  # ── Jackson ──────────────────────────────────────────────
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: non_null
+    time-zone: UTC
+
+# ── Server ───────────────────────────────────────────────────
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never          # Never expose stack traces in responses
+    include-exception: false
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain
+    min-response-size: 1024
+  servlet:
+    context-path: /
+
+# ── App-Specific Configuration ────────────────────────────────
+app:
+  # JWT Configuration
+  jwt:
+    secret: ${JWT_SECRET:ChangeThisToA256BitSecretKeyInProduction!AquaTrack2024Secure}
+    access-token-expiry-ms: ${JWT_ACCESS_EXPIRY_MS:900000}       # 15 minutes
+    refresh-token-expiry-ms: ${JWT_REFRESH_EXPIRY_MS:604800000}  # 7 days
+
+  # CORS
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
+
+  # Rate Limiting (Bucket4j — per IP)
+  rate-limit:
+    capacity: ${RATE_LIMIT_CAPACITY:100}        # Maximum tokens in the bucket
+    refill-tokens: ${RATE_LIMIT_REFILL:100}     # Tokens added per period
+    refill-period-seconds: ${RATE_LIMIT_PERIOD:60}
+
+  # Email
+  email:
+    from-address: ${MAIL_FROM_ADDRESS:noreply@aquatrack.com}
+    from-name: ${MAIL_FROM_NAME:AquaTrack}
+    base-url: ${APP_BASE_URL:http://localhost:8080}
+
+  # Frontend URL (for email links)
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:5173}
+
+  # Swagger server URL
+  swagger:
+    server-url: ${SWAGGER_SERVER_URL:http://localhost:8080}
+
+# ── Actuator ────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info,metrics,flyway
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: when-authorized
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: AquaTrack
+    version: 1.0.0
+    description: Water Consumption and Billing Management Platform
+
+# ── SpringDoc / Swagger ────────────────────────────────────
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    tags-sorter: alpha
+    operations-sorter: method
+    display-request-duration: true
+    filter: true
+  show-actuator: false
+
+# ── Logging ──────────────────────────────────────────────────
+logging:
+  config: classpath:logback-spring.xml
