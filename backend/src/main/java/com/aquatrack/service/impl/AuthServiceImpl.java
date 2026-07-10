@@ -129,8 +129,8 @@ public class AuthServiceImpl implements AuthService {
                 .emailVerified(false)
                 .accountLocked(false)
                 .failedLoginAttempts(0)
-                .status(Status.PENDING)
                 .build();
+        user.setStatus(Status.PENDING);
 
         User savedUser = userRepository.save(user);
         log.info("User registered: {} [id={}]", savedUser.getEmail(), savedUser.getId());
