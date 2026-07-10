@@ -100,8 +100,8 @@ class AuthServiceImplTest {
                 .emailVerified(true)
                 .accountLocked(false)
                 .failedLoginAttempts(0)
-                .status(Status.ACTIVE)
                 .build();
+        activeUser.setStatus(Status.ACTIVE);
         ReflectionTestUtils.setField(activeUser, "id", UUID.randomUUID());
     }
 
@@ -254,8 +254,8 @@ class AuthServiceImplTest {
                     .emailVerified(false)
                     .accountLocked(false)
                     .failedLoginAttempts(0)
-                    .status(Status.PENDING)
                     .build();
+            unverifiedUser.setStatus(Status.PENDING);
             ReflectionTestUtils.setField(unverifiedUser, "id", UUID.randomUUID());
 
             LoginRequest request = new LoginRequest("priya@example.com", "Secure@123");
@@ -285,8 +285,8 @@ class AuthServiceImplTest {
                     .accountLocked(true)
                     .accountLockedUntil(java.time.LocalDateTime.now().plusMinutes(20))
                     .failedLoginAttempts(5)
-                    .status(Status.ACTIVE)
                     .build();
+            lockedUser.setStatus(Status.ACTIVE);
             ReflectionTestUtils.setField(lockedUser, "id", UUID.randomUUID());
 
             LoginRequest request = new LoginRequest("priya@example.com", "Secure@123");
