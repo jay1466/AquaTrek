@@ -279,4 +279,4 @@ See `.env.example` for the complete list. Critical variables:
 
 ## License
 
-Proprietary — AquaTrack Engineering Team © 2026
+Proprietary — AquaTrack Engineering Team © 2024
