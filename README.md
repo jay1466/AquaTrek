@@ -199,9 +199,9 @@ aquatrack/
 | # | Module              | Status       | API Prefix              |
 |---|---------------------|--------------|-------------------------|
 | 0 | Project Foundation  | ✅ Complete   | —                       |
-| 1 | Authentication      | 🔄 Next       | `/api/v1/auth`          |
-| 2 | Apartment Mgmt      | ⏳ Pending    | `/api/v1/apartments`    |
-| 3 | Household Mgmt      | ⏳ Pending    | `/api/v1/households`    |
+| 1 | Authentication      | ✅ Complete   | `/api/v1/auth`          |
+| 2 | Apartment Mgmt      | ✅ Complete   | `/api/v1/apartments`    |
+| 3 | Household Mgmt      | 🔄 Next       | `/api/v1/households`    |
 | 4 | Water Meters        | ⏳ Pending    | `/api/v1/meters`        |
 | 5 | Billing Engine      | ⏳ Pending    | `/api/v1/billing`       |
 | 6 | Bulk Water Purchase | ⏳ Pending    | `/api/v1/bulk-water`    |
